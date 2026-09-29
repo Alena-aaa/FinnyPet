@@ -3,10 +3,9 @@ import '../models/period_fact.dart';
 import '../models/period_result.dart';
 import '../models/transaction.dart';
 import '../models/game_period.dart';
-import 'growth_service.dart';
 
 class PeriodService {
-  PeriodFact calculateFact(List<Transaction> transactions) {
+  PeriodFact calculateFact(List<Transaction> transactions,  BudgetPlan? plan,) {
     int mandatory =0;
     int optional =0;
     int savings =0;
@@ -31,6 +30,7 @@ class PeriodService {
       mandatory: mandatory,
       optional: optional,
       savings: savings,
+      plan: plan,
     );
   }
 
@@ -54,7 +54,7 @@ class PeriodService {
     if (period.completed) {return false;}
     if (period.budgetPlan==null) {return false;}
 
-    final fact = calculateFact(transactions);
+    final fact = calculateFact(transactions,  period.budgetPlan,);
     final totalSpent = fact.mandatory+fact.optional+fact.savings;
     return totalSpent<=period.income;
   }
@@ -68,16 +68,16 @@ class PeriodService {
         transactions: transactions,
     )) {return null;}
 
-    final fact = calculateFact(transactions);
+    final fact = calculateFact(transactions,  period.budgetPlan,);
 
     period.actualMandatory = fact.mandatory;
     period.actualOptional = fact.optional;
     period.actualSavings = fact.savings;
     period.completed = true;
 
-    final growthService = GrowthService();
-    final growthPoints = growthService.calculateGrowthPoints(fact);
+    final growthPoints = 0; //!!!
 
     return comparePlanAndFact(period.budgetPlan!, fact, growthPoints,);
   }
 }
+

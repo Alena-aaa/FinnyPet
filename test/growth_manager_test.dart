@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pet_budget_app/game/pet/pet.dart';
-import 'package:pet_budget_app/game/pet/pet_rules.dart';
-import 'package:pet_budget_app/game/growth/growth_manager.dart';
+import 'package:pet_finance/game/pet/pet.dart';
+import 'package:pet_finance/game/pet/pet_rules.dart';
+import 'package:pet_finance/game/growth/growth_manager.dart';
 
 void main() {
   late GrowthManager growth;
@@ -76,3 +76,4 @@ void main() {
     expect(growth.progressToNextStage(100), 1.0);
   });
 }
+

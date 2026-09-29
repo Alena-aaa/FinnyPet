@@ -1,6 +1,7 @@
 import 'task.dart';
 import 'task_data.dart';
 import 'consequence_manager.dart';
+import '/../models/transaction.dart';
 
 /// Результат выбора — что показать ребёнку.
 class ChoiceResult {
@@ -8,12 +9,15 @@ class ChoiceResult {
   final String? errorMessage;
   final String? explanation;
   final ConsequenceReport? report;
+  final List<Transaction> transactions;
+
 
   const ChoiceResult({
     required this.success,
     this.errorMessage,
     this.explanation,
     this.report,
+    this.transactions = const [],
   });
 }
 
@@ -38,6 +42,18 @@ class TaskManager {
       }
     }
     return null;
+  }
+
+  bool isCurrentPeriodCompleted(int periodNumber) {
+    final periodTasks = _tasks
+        .where((task) => task.periodNumber == periodNumber)
+        .toList();
+
+    if (periodTasks.isEmpty) {
+      return false;
+    }
+
+    return periodTasks.every((task) => task.completed);
   }
 
   /// Задание по id.
@@ -96,6 +112,7 @@ class TaskManager {
       success: true,
       explanation: choice.explanation,
       report: report,
+      transactions: report.transactions,
     );
   }
 
@@ -108,6 +125,20 @@ class TaskManager {
     task.chosenChoiceId = null;
   }
 
+  void restoreTaskState(
+      List<Map<String, dynamic>> savedStates,
+      ) {
+    for (final saved in savedStates) {
+      final taskId = saved['taskId'] as String;
+      final task = getTaskById(taskId);
+
+      if (task == null) continue;
+
+      task.completed = saved['completed'] as bool? ?? false;
+      task.chosenChoiceId = saved['chosenChoiceId'] as String?;
+    }
+  }
+
   void resetAll() {
     for (final t in _tasks) {
       t.completed = false;
@@ -115,3 +146,4 @@ class TaskManager {
     }
   }
 }
+

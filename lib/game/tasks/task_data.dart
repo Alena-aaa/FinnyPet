@@ -1,4 +1,5 @@
 import 'task.dart';
+import '../../models/transaction.dart';
 
 /// 6 заданий: 2×BUDGET, 2×SAVINGS, 2×PURCHASE.
 class TaskData {
@@ -25,7 +26,7 @@ class TaskData {
             id: 'a',
             text: 'Купить корм, игрушку отложить',
             consequences: const [
-              Consequence(target: ConsequenceTarget.ECONOMY, field: 'balance', delta: -30),
+              Consequence(target: ConsequenceTarget.ECONOMY, field: 'balance', delta: -30, transactionType: TransactionType.mandatory,),
               Consequence(target: ConsequenceTarget.PET, field: 'satiety', delta: 20),
               Consequence(target: ConsequenceTarget.PET, field: 'mood', delta: -5),
             ],
@@ -37,7 +38,7 @@ class TaskData {
             id: 'b',
             text: 'Купить игрушку, корм отложить',
             consequences: const [
-              Consequence(target: ConsequenceTarget.ECONOMY, field: 'balance', delta: -25),
+              Consequence(target: ConsequenceTarget.ECONOMY, field: 'balance', delta: -25, transactionType: TransactionType.optional,),
               Consequence(target: ConsequenceTarget.PET, field: 'mood', delta: 15),
               Consequence(target: ConsequenceTarget.PET, field: 'satiety', delta: -20),
             ],
@@ -72,8 +73,7 @@ class TaskData {
             id: 'a',
             text: 'Отложить 30 в копилку, 10 оставить',
             consequences: const [
-              Consequence(target: ConsequenceTarget.ECONOMY, field: 'savings', delta: 30),
-              Consequence(target: ConsequenceTarget.ECONOMY, field: 'balance', delta: -30),
+              Consequence(target: ConsequenceTarget.ECONOMY, field: 'savings', delta: 30, transactionType: TransactionType.saving,),
               Consequence(target: ConsequenceTarget.PET, field: 'mood', delta: -5),
             ],
             explanation:
@@ -84,7 +84,7 @@ class TaskData {
             id: 'b',
             text: 'Купить игрушку за 35',
             consequences: const [
-              Consequence(target: ConsequenceTarget.ECONOMY, field: 'balance', delta: -35),
+              Consequence(target: ConsequenceTarget.ECONOMY, field: 'balance', delta: -35, transactionType: TransactionType.optional,),
               Consequence(target: ConsequenceTarget.PET, field: 'mood', delta: 20),
             ],
             explanation:
@@ -108,7 +108,7 @@ class TaskData {
             id: 'a',
             text: 'Купить дешёвый за 10',
             consequences: const [
-              Consequence(target: ConsequenceTarget.ECONOMY, field: 'balance', delta: -10),
+              Consequence(target: ConsequenceTarget.ECONOMY, field: 'balance', delta: -10, transactionType: TransactionType.optional,),
               Consequence(target: ConsequenceTarget.PET, field: 'satiety', delta: 10),
             ],
             explanation:
@@ -119,7 +119,7 @@ class TaskData {
             id: 'b',
             text: 'Купить хороший за 25',
             consequences: const [
-              Consequence(target: ConsequenceTarget.ECONOMY, field: 'balance', delta: -25),
+              Consequence(target: ConsequenceTarget.ECONOMY, field: 'balance', delta: -25, transactionType: TransactionType.optional,),
               Consequence(target: ConsequenceTarget.PET, field: 'satiety', delta: 30),
             ],
             explanation:
@@ -153,7 +153,7 @@ class TaskData {
             text: 'Взять 15 из накоплений',
             consequences: const [
               Consequence(target: ConsequenceTarget.ECONOMY, field: 'savings', delta: -15),
-              Consequence(target: ConsequenceTarget.ECONOMY, field: 'balance', delta: -15),
+              Consequence(target: ConsequenceTarget.ECONOMY, field: 'balance', delta: 15),
               Consequence(target: ConsequenceTarget.PET, field: 'mood', delta: 15),
             ],
             explanation:
@@ -178,7 +178,7 @@ class TaskData {
             text: 'Не покупать, докопить',
             consequences: const [
               Consequence(target: ConsequenceTarget.PET, field: 'mood', delta: -10),
-              Consequence(target: ConsequenceTarget.ECONOMY, field: 'savings', delta: 20),
+              Consequence(target: ConsequenceTarget.ECONOMY, field: 'savings', delta: 20, transactionType: TransactionType.saving,),
               Consequence(target: ConsequenceTarget.ECONOMY, field: 'balance', delta: -20),
             ],
             explanation:
@@ -188,7 +188,7 @@ class TaskData {
             id: 'b',
             text: 'Купить игрушку',
             consequences: const [
-              Consequence(target: ConsequenceTarget.ECONOMY, field: 'balance', delta: -20),
+              Consequence(target: ConsequenceTarget.ECONOMY, field: 'balance', delta: -20, transactionType: TransactionType.optional,),
               Consequence(target: ConsequenceTarget.PET, field: 'mood', delta: 20),
             ],
             explanation:
@@ -211,7 +211,7 @@ class TaskData {
             id: 'a',
             text: 'Купить шляпу',
             consequences: const [
-              Consequence(target: ConsequenceTarget.ECONOMY, field: 'balance', delta: -30),
+              Consequence(target: ConsequenceTarget.ECONOMY, field: 'balance', delta: -30, transactionType: TransactionType.optional,),
               Consequence(target: ConsequenceTarget.PET, field: 'mood', delta: 20),
             ],
             explanation:
@@ -230,3 +230,4 @@ class TaskData {
         ],
       );
 }
+

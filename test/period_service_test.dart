@@ -1,197 +1,101 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:pet_finance/models/transaction.dart';
-import 'package:pet_finance/services/period_service.dart';
-
 import 'package:pet_finance/models/budget_plan.dart';
 import 'package:pet_finance/models/period_fact.dart';
-import 'package:pet_finance/models/game_period.dart';
+import 'package:pet_finance/services/growth_service.dart';
 
 void main() {
-  test('PeriodService считает фактические расходы по категориям', () {
-    final service = PeriodService();
+  test('GrowthService даёт очки за обязательные расходы, план и накопления', () {
+    final service = GrowthService();
 
-    final transactions = [
-      Transaction(
-        type: TransactionType.mandatory,
-        amount: 50,
-        source: 'Еда',
-        period: 1,
-        timestamp: DateTime(2026, 9, 25),
-      ),
-      Transaction(
-        type: TransactionType.optional,
-        amount: 20,
-        source: 'Игрушка',
-        period: 1,
-        timestamp: DateTime(2026, 9, 25),
-      ),
-      Transaction(
-        type: TransactionType.optional,
-        amount: 15,
-        source: 'Мороженое',
-        period: 1,
-        timestamp: DateTime(2026, 9, 25),
-      ),
-      Transaction(
-        type: TransactionType.saving,
-        amount: 30,
-        source: 'Велосипед',
-        period: 1,
-        timestamp: DateTime(2026, 9, 25),
-      ),
-      Transaction(
-        type: TransactionType.income,
-        amount: 120,
-        source: 'Награда',
-        period: 1,
-        timestamp: DateTime(2026, 9, 25),
-      ),
-    ];
-
-    final fact = service.calculateFact(transactions);
-
-    expect(fact.mandatory, 50);
-    expect(fact.optional, 35);
-    expect(fact.savings, 30);
-  });
-
-  test('PeriodService сравнивает план и факт', () {
-    final service = PeriodService();
-
-    final plan = BudgetPlan(
-      mandatory: 50,
-      optional: 20,
-      savings: 30,
-    );
-
-    final fact = PeriodFact(
-      mandatory: 50,
-      optional: 35,
-      savings: 15,
-    );
-
-    final result = service.comparePlanAndFact(
-      plan,
-      fact,
-      1,
-    );
-
-    expect(result.mandatoryDifference, 0);
-    expect(result.optionalDifference, 15);
-    expect(result.savingsDifference, -15);
-    expect(result.growthPoints, 1);
-  });
-
-  test('completePeriod записывает факт и завершает период', () {
-    final service = PeriodService();
-
-    final period = GamePeriod(
-      number: 1,
-      income: 100,
-      budgetPlan: BudgetPlan(
-        mandatory: 50,
+    final facts = [
+      PeriodFact(
+        mandatory: 30,
         optional: 20,
         savings: 30,
-      ),
-    );
-
-    final transactions = [
-      Transaction(
-        type: TransactionType.mandatory,
-        amount: 50,
-        source: 'Еда',
-        period: 1,
-        timestamp: DateTime(2026, 9, 25),
-      ),
-      Transaction(
-        type: TransactionType.optional,
-        amount: 35,
-        source: 'Игрушки',
-        period: 1,
-        timestamp: DateTime(2026, 9, 25),
-      ),
-      Transaction(
-        type: TransactionType.saving,
-        amount: 15,
-        source: 'Велосипед',
-        period: 1,
-        timestamp: DateTime(2026, 9, 25),
+        plan: BudgetPlan(
+          mandatory: 30,
+          optional: 20,
+          savings: 50,
+        ),
       ),
     ];
 
-    final result = service.completePeriod(
-      period: period,
-      transactions: transactions,
-    );
+    final points = service.calculateGrowthPoints(facts);
 
-    expect(result, isNotNull);
-    expect(result!.mandatoryDifference, 0);
-    expect(result.optionalDifference, 15);
-    expect(result.savingsDifference, -15);
-    expect(result.growthPoints, 1);
-
-    expect(period.actualMandatory, 50);
-    expect(period.actualOptional, 35);
-    expect(period.actualSavings, 15);
-    expect(period.completed, true);
+    expect(points, 3);
   });
 
-  test('completePeriod не завершает период без бюджета', () {
-    final service = PeriodService();
+  test('GrowthService даёт очко за соответствие плану', () {
+    final service = GrowthService();
 
-    final period = GamePeriod(
-      number: 1,
-      income: 100,
-    );
+    final facts = [
+      PeriodFact(
+        mandatory: 0,
+        optional: 10,
+        savings: 20,
+        plan: BudgetPlan(
+          mandatory: 30,
+          optional: 20,
+          savings: 50,
+        ),
+      ),
+    ];
 
-    final transactions = <Transaction>[];
+    final points = service.calculateGrowthPoints(facts);
 
-    final result = service.completePeriod(
-      period: period,
-      transactions: transactions,
-    );
-
-    expect(result, isNull);
-    expect(period.completed, false);
+    expect(points, 2);
   });
 
-  test('completePeriod не завершает период при перерасходе', () {
-    final service = PeriodService();
+  test('GrowthService не даёт очко за превышение плана', () {
+    final service = GrowthService();
 
-    final period = GamePeriod(
-      number: 1,
-      income: 100,
-      budgetPlan: BudgetPlan(
-        mandatory: 50,
+    final facts = [
+      PeriodFact(
+        mandatory: 40,
         optional: 30,
         savings: 20,
-      ),
-    );
-
-    final transactions = [
-      Transaction(
-        type: TransactionType.mandatory,
-        amount: 60,
-        source: 'Еда',
-        period: 1,
-        timestamp: DateTime(2026, 9, 25),
-      ),
-      Transaction(
-        type: TransactionType.optional,
-        amount: 50,
-        source: 'Игрушка',
-        period: 1,
-        timestamp: DateTime(2026, 9, 25),
+        plan: BudgetPlan(
+          mandatory: 30,
+          optional: 20,
+          savings: 50,
+        ),
       ),
     ];
 
-    final result = service.completePeriod(
-      period: period,
-      transactions: transactions,
-    );
+    final points = service.calculateGrowthPoints(facts);
 
-    expect(result, isNull);
-    expect(period.completed, false);
+    expect(points, 2);
+  });
+
+  test('GrowthService суммирует очки нескольких периодов', () {
+    final service = GrowthService();
+
+    final facts = [
+      PeriodFact(
+        mandatory: 30,
+        optional: 10,
+        savings: 20,
+        plan: BudgetPlan(
+          mandatory: 30,
+          optional: 20,
+          savings: 50,
+        ),
+      ),
+      PeriodFact(
+        mandatory: 0,
+        optional: 10,
+        savings: 30,
+        plan: BudgetPlan(
+          mandatory: 30,
+          optional: 20,
+          savings: 50,
+        ),
+      ),
+    ];
+
+    final points = service.calculateGrowthPoints(facts);
+
+    expect(points, 5);
   });
 }

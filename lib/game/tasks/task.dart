@@ -1,3 +1,4 @@
+import '../../models/transaction.dart';
 /// Тема задания.
 enum TaskTheme { BUDGET, SAVINGS, PURCHASE }
 
@@ -9,11 +10,13 @@ class Consequence {
   final ConsequenceTarget target;
   final String field;
   final int delta;
+  final TransactionType? transactionType;
 
   const Consequence({
     required this.target,
     required this.field,
     required this.delta,
+    this.transactionType,
   });
 }
 
@@ -62,3 +65,4 @@ class Task {
     return null;
   }
 }
+

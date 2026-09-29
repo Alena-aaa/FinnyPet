@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pet_budget_app/game/pet/pet.dart';
-import 'package:pet_budget_app/game/pet/pet_manager.dart';
-import 'package:pet_budget_app/game/pet/in_memory_pet_storage.dart';
-import 'package:pet_budget_app/game/pet/pet_rules.dart';
+import 'package:pet_finance/game/pet/pet.dart';
+import 'package:pet_finance/game/pet/pet_manager.dart';
+import 'package:pet_finance/game/pet/in_memory_pet_storage.dart';
+import 'package:pet_finance/game/pet/pet_rules.dart';
 
 void main() {
   late PetManager manager;
@@ -124,3 +124,4 @@ void main() {
     expect(manager.getPet(), isNull);
   });
 }
+

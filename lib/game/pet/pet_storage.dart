@@ -6,3 +6,4 @@ abstract class PetStorage {
   Future<void> save(Pet pet);
   Future<void> clear();
 }
+

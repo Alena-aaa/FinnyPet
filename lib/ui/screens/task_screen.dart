@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../app_controller.dart';
 import '../../game/tasks/task.dart';
 import '../../game/tasks/task_manager.dart';
 import '../../game/tasks/consequence_manager.dart';
+import 'period_result_screen.dart';
 
 /// Экран задания. Показывает ситуацию, варианты выбора,
 /// после выбора — последствия и объяснение.
@@ -31,6 +33,16 @@ class _TaskScreenState extends State<TaskScreen> {
     final result = await widget.taskManager.submitChoice(
       taskId: widget.task.id,
       choiceId: choiceId,
+    );
+    AppController.instance.currentPeriodTransactions
+        .addAll(result.transactions);
+
+    await AppController.instance.saveState();
+
+    debugPrint(
+      'Transactions: ${result.transactions.map(
+            (t) => '${t.type.name} ${t.amount}',
+      ).join(', ')}',
     );
 
     setState(() {
@@ -90,7 +102,7 @@ class _TaskScreenState extends State<TaskScreen> {
 
         // Отложенные (ECONOMY — Алёна применит позже)
         if (report != null && report.pending.isNotEmpty) ...[
-          const Text('💰 Экономика (применится позже):',
+          const Text('💰 Экономика:',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
           ...report.pending.map((c) => _consequenceRow(c.field, c.delta)),
           const SizedBox(height: 8),
@@ -120,11 +132,38 @@ class _TaskScreenState extends State<TaskScreen> {
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: () {
-              if (widget.onCompleted != null) {
-                widget.onCompleted!();
-              } else {
-                Navigator.of(context).pop();
+            onPressed: () async {
+              await AppController.instance.completeCurrentPeriod();
+
+              if (!mounted) {
+                return;
+              }
+
+              final oldPeriod = AppController.instance.player.currentPeriod;
+
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const PeriodResultScreen(),
+                ),
+              );
+
+              if (!context.mounted) return;
+
+              final controller = AppController.instance;
+
+              if (controller.player.currentPeriod != oldPeriod) {
+                final income = controller.periods[
+                controller.player.currentPeriod - 1
+                ].income;
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Новый период! Тебе начислено $income монет.',
+                    ),
+                    duration: const Duration(seconds: 3),
+                  ),
+                );
               }
             },
             child: const Padding(
@@ -223,3 +262,4 @@ class _TaskScreenState extends State<TaskScreen> {
     }
   }
 }
+

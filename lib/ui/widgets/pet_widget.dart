@@ -1,62 +1,49 @@
 import 'package:flutter/material.dart';
+
 import '../../game/pet/pet.dart';
 import '../../game/pet/pet_rules.dart';
 
-/// Виджет питомца. Только отображение — никакой логики.
-/// Получает готовый Pet через параметр.
 class PetWidget extends StatelessWidget {
   final Pet pet;
 
-  const PetWidget({super.key, required this.pet});
+  const PetWidget({
+    super.key,
+    required this.pet,
+  });
 
-  // ---------- ВСПОМОГАТЕЛЬНЫЕ ----------
+  String _petAssetPath() {
+    final animalName = switch (pet.type) {
+      PetType.cat => 'кошка',
+      PetType.dog => 'собака',
+      PetType.hamster => 'хомяк',
+    };
 
-  /// Эмодзи/символ питомца по типу + цвету + стадии.
-  /// Пока заглушки — на Этапе 8 заменим на картинки.
-  String _petEmoji() {
-    String base;
-    switch (pet.type) {
-      case PetType.cat:
-        base = '🐱';
-        break;
-      case PetType.dog:
-        base = '🐶';
-        break;
-      case PetType.parrot:
-        base = '🦜';
-        break;
-    }
+    final colorNumber = switch (pet.color) {
+      PetColor.white => 1,
+      PetColor.black => 2,
+      PetColor.red => 3,
+    };
 
-    // Для baby — маленький, для adult — большой.
-    // Пока просто добавляем размер через fontSize.
-    return base;
+    final stageNumber = switch (pet.growthStage) {
+      GrowthStage.baby => 1,
+      GrowthStage.teen => 2,
+      GrowthStage.adult => 3,
+    };
+
+    return 'assets/animals/$animalName $colorNumber.$stageNumber.png';
   }
 
-  /// Размер эмодзи по стадии роста.
-  double _emojiSize() {
+  double _petSize() {
     switch (pet.growthStage) {
       case GrowthStage.baby:
-        return 60;
-      case GrowthStage.teen:
         return 90;
-      case GrowthStage.adult:
+      case GrowthStage.teen:
         return 120;
+      case GrowthStage.adult:
+        return 145;
     }
   }
 
-  /// Цвет питомца — для фона/подложки.
-  Color _petColor() {
-    switch (pet.color) {
-      case PetColor.black:
-        return Colors.grey.shade800;
-      case PetColor.white:
-        return Colors.grey.shade200;
-      case PetColor.red:
-        return Colors.red.shade400;
-    }
-  }
-
-  /// Название стадии роста.
   String _stageLabel() {
     switch (pet.growthStage) {
       case GrowthStage.baby:
@@ -68,48 +55,45 @@ class PetWidget extends StatelessWidget {
     }
   }
 
-  /// Прогресс роста 0..1 — сколько до следующей стадии.
   double _growthProgress() {
-    if (pet.growthStage == GrowthStage.adult) return 1.0;
-    // baby: 0..2 (нужно 3), teen: 3..5 (нужно 6)
-    final points = pet.growthPoints;
-    if (pet.growthStage == GrowthStage.baby) {
-      return (points / PetRules.teenThreshold).clamp(0.0, 1.0);
+    switch (pet.growthStage) {
+      case GrowthStage.baby:
+        return pet.growthPoints / PetRules.teenThreshold;
+      case GrowthStage.teen:
+        return (pet.growthPoints - PetRules.teenThreshold) /
+            (PetRules.adultThreshold - PetRules.teenThreshold);
+      case GrowthStage.adult:
+        return 1.0;
     }
-    // teen
-    final from = PetRules.teenThreshold;
-    final to = PetRules.adultThreshold;
-    return ((points - from) / (to - from)).clamp(0.0, 1.0);
   }
 
-  /// Полоска состояния (mood/satiety/care).
-  Widget _statBar(String label, int value, Color color) {
+  Widget _statBar({
+    required String label,
+    required int value,
+    required IconData icon,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
+          Icon(icon, size: 20),
+          const SizedBox(width: 8),
           SizedBox(
-            width: 90,
-            child: Text(label, style: const TextStyle(fontSize: 14)),
+            width: 80,
+            child: Text(label),
           ),
           Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: LinearProgressIndicator(
-                value: value / 100,
-                minHeight: 12,
-                backgroundColor: Colors.grey.shade300,
-                valueColor: AlwaysStoppedAnimation<Color>(color),
-              ),
+            child: LinearProgressIndicator(
+              value: value / PetRules.statMax,
+              minHeight: 8,
             ),
           ),
           const SizedBox(width: 8),
           SizedBox(
-            width: 40,
+            width: 35,
             child: Text(
               '$value',
               textAlign: TextAlign.right,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -117,71 +101,72 @@ class PetWidget extends StatelessWidget {
     );
   }
 
-  // ---------- BUILD ----------
-
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Имя питомца
             Text(
               pet.name,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
+
             const SizedBox(height: 8),
 
-            // Кружок с эмодзи на цветном фоне
-            Container(
-              width: 160,
-              height: 160,
-              decoration: BoxDecoration(
-                color: _petColor().withOpacity(0.25),
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                _petEmoji(),
-                style: TextStyle(fontSize: _emojiSize()),
+            SizedBox(
+              width: 180,
+              height: 180,
+              child: Image.asset(
+                _petAssetPath(),
+                width: _petSize(),
+                height: _petSize(),
+                fit: BoxFit.contain,
               ),
             ),
-            const SizedBox(height: 12),
 
-            // Стадия роста
             Text(
               _stageLabel(),
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey.shade700,
-                fontWeight: FontWeight.w500,
-              ),
+              style: Theme.of(context).textTheme.titleMedium,
             ),
-            const SizedBox(height: 4),
 
-            // Прогресс роста
-            ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: LinearProgressIndicator(
-                value: _growthProgress(),
-                minHeight: 8,
-                backgroundColor: Colors.grey.shade300,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.green.shade400),
-              ),
+            const SizedBox(height: 8),
+
+            Row(
+              children: [
+                const Text('Рост'),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: LinearProgressIndicator(
+                    value: _growthProgress().clamp(0.0, 1.0),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text('${pet.growthPoints}'),
+              ],
             ),
-            const SizedBox(height: 16),
 
-            // Полоски состояния
-            _statBar('😊 Настроение', pet.mood, Colors.orange),
-            _statBar('🍖 Сытость', pet.satiety, Colors.brown),
-            _statBar('🧼 Уход', pet.care, Colors.blue),
+            const SizedBox(height: 12),
+
+            _statBar(
+              label: 'Настроение',
+              value: pet.mood,
+              icon: Icons.favorite,
+            ),
+
+            _statBar(
+              label: 'Сытость',
+              value: pet.satiety,
+              icon: Icons.restaurant,
+            ),
+
+            _statBar(
+              label: 'Уход',
+              value: pet.care,
+              icon: Icons.cleaning_services,
+            ),
           ],
         ),
       ),

@@ -98,3 +98,4 @@ void main() {
     expect(goal.savedAmount, 50);
   });
 }
+

@@ -46,3 +46,4 @@ class GrowthManager {
     return ((growthPoints - from) / (to - from)).clamp(0.0, 1.0);
   }
 }
+

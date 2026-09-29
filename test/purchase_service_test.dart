@@ -93,3 +93,4 @@ void main() {
     expect(player.currentBalance, 10);
   });
 }
+

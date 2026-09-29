@@ -11,3 +11,4 @@ class SavingsGoal {
     required this.savedAmount,
 });
 }
+

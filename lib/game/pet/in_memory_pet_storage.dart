@@ -15,3 +15,4 @@ class InMemoryPetStorage implements PetStorage {
   @override
   Future<void> clear() async => _pet = null;
 }
+

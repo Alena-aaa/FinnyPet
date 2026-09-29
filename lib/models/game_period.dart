@@ -22,3 +22,4 @@ class GamePeriod {
     this.completed = false,
   });
 }
+

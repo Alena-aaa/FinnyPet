@@ -11,3 +11,4 @@ class PeriodResult {
     required this.growthPoints,
   });
 }
+

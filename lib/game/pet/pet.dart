@@ -5,7 +5,7 @@
 enum GrowthStage { baby, teen, adult }
 
 /// Тип питомца. 3 формы × 3 цвета = 9 комбинаций.
-enum PetType { cat, dog, parrot }
+enum PetType { cat, dog, hamster }
 
 /// Цвет питомца.
 enum PetColor { black, white, red }
@@ -84,3 +84,4 @@ class Pet {
         growthStage: GrowthStage.values.byName(map['growthStage'] as String),
       );
 }
+

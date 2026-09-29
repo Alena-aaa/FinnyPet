@@ -20,3 +20,4 @@ class Transaction { //что произошло, сколько деняк, от
     required this.timestamp,
 });
 }
+
